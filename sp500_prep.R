@@ -139,9 +139,6 @@ getHLOC <- function(stkDF, pth = "~/Desktop/HBS_execEd/GroupData/"){
 }
 
 # Transcripts supporting functions 
-# install.packages("rvest", "httr")
-#library(rvest)
-
 parse_bubble <- function(bubble) {
   # Extracts speaker, title, and message content from a single speech bubble.
   
@@ -171,27 +168,34 @@ get_transcript_from_url <- function(url) {
 }
 
 get_btn_from_exchange <- function(ticker, exchange) {
-  url <- paste('https://www.marketbeat.com/stocks', exchange, ticker, '/earnings', sep = '/')
+  url <- paste('https://www.marketbeat.com/stocks', exchange, ticker, 'earnings', sep = '/')
   page <- read_html(url)
   
   button <- page %>% html_element(css = '#cphPrimaryContent_cphTabContent_pnlSummary .green-button.w-100')
+  
+  if(!length(button)){
+    print(paste("Warning: Ticker", ticker,"recent transcript not found searching for older doc."))
+    button <- page %>% html_element(xpath = '//*[@id="earnings-history"]/tbody/tr[3]/td[9]/a[1]')
+  }
   return(button)
 }
 
 ticker_to_transcript <- function(ticker) {
-  button = get_btn_from_exchange(ticker, 'NASDAQ')
+  button <- get_btn_from_exchange(ticker, 'NASDAQ')
   
   if (!length(button)) {
     print("Trying NYSE instead...")
-    button = get_btn_from_exchange(ticker, 'NYSE')
+    button <- get_btn_from_exchange(ticker, 'NYSE')
   }
   
   if (!length(button)) {
-    print(paste("Warning: Ticker", ticker,"not found or no transcript available"))
+    print(paste("Warning: Ticker", ticker,"not found or no transcript available."))
+  
     return(NULL) 
   }
   
   transcript_url <- button %>% html_attr("href")
+  
   
   return( get_transcript_from_url(transcript_url) )
 }
@@ -202,22 +206,29 @@ ticker_to_transcript <- function(ticker) {
 #ticker_to_transcript('TSM') # NYSE listed, but no transcript available
 #ticker_to_transcript('COOL') # doesn't exist
 
-getTranscripts <- function(pth = "~/Desktop/HBS_execEd/GroupData/"){
+getTranscripts <- function(pth = "~/Desktop/HBS_execEDU/GroupData2"){
   library(rvest)
   library(httr)
   
   # Get all directories for each group
   allGrps <- dir(pth, full.names = T)
   
+  # Index by grp number to make sure the scrape is correct
+  idx <- as.numeric(gsub('group-','',unlist(lapply(strsplit(allGrps, '/'), tail, 1))))
+  idx <- order(idx, decreasing = F)
+  allGrps <- allGrps[idx]
+  
   for(i in 1:length(allGrps)){
-    print(paste('Working on:',i))
+    print(paste('Working on group:',allGrps[i]))
     # Get the stock info
     companyInfo <- list.files(path = allGrps[i], 
                               pattern = '.csv',
                               full.names = T)
     companyStk <- read.csv(companyInfo)$Symbol
-    print(companyStk[i])
+    print(companyStk)
+    #Sys.sleep(5)
     for(j in 1:length(companyStk)){
+      #print(companyStk[j])
       oneTranscript <- ticker_to_transcript(companyStk[j])
       Sys.sleep(1)
       nam <- paste0(allGrps[i],'/',companyStk[j],'_transcript_',Sys.Date(),'.csv')
@@ -232,8 +243,8 @@ sp500 <- getSP500()
 
 # Obtain the pairs for groups
 spPairs <- getSP500pairs(sp500, factorLevel = 'GICS.Sub.Industry')
-getHLOC(spPairs, pth = "~/Desktop/HBS_execEDU/GroupData/")
+getHLOC(spPairs, pth = "~/Desktop/HBS_execEDU/GroupData2/")
 
 # Add recent transcripts
-getTranscripts(pth = "~/Desktop/HBS_execEDU/GroupData/")
+getTranscripts(pth = "~/Desktop/HBS_execEDU/GroupData2/")
 
