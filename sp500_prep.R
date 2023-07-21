@@ -12,21 +12,10 @@ getSP500 <- function(){
   x <- x[[1]]
   x$Symbol <- gsub('[.]','-',x$Symbol)
   
-  # Profile Summary
-  #wikiURLs <- read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies') %>% 
-  #  html_nodes(xpath = '//td') %>% html_nodes("a") %>% html_attr("href")
-  #grep('/wiki/', wikiURLs)
-  
-  
   # Clean up
   names(x) <-  make.names(names(x))
   return(x)
 }
-
-# Examine the results
-#head(sp500)
-#table(sp500$GICS.Sector)
-#subset(table(sp500$GICS.Sub.Industry), table(sp500$GICS.Sub.Industry)>=2)
 
 # Subset the data frame to keep rows with industry levels that occur more than twice
 getSP500pairs <- function(sp500, factorLevel = 'GICS.Sub.Industry', grpN = 20){
@@ -242,9 +231,39 @@ getTranscripts <- function(pth = "~/Desktop/HBS_execEDU/GroupData2"){
 sp500 <- getSP500()
 
 # Obtain the pairs for groups
-spPairs <- getSP500pairs(sp500, factorLevel = 'GICS.Sub.Industry')
-getHLOC(spPairs, pth = "~/Desktop/HBS_execEDU/GroupData2/")
+spPairs <- getSP500pairs(sp500, factorLevel = 'GICS.Sub.Industry', grpN = 20)
+getHLOC(spPairs, pth = "~/Desktop/HBS_execEDU/GroupData5/")
 
 # Add recent transcripts
-getTranscripts(pth = "~/Desktop/HBS_execEDU/GroupData2/")
+getTranscripts(pth = "~/Desktop/HBS_execEDU/GroupData5/")
+
+###
+# Get the Stock list
+sp500 <- getSP500()
+
+# Since there are some transcript web scraping issues, using a while loop and only iterating when two complete transcripts are found.
+completeTeams <- 0
+while(completeTeams <30){
+  spPairs <- getSP500pairs(sp500, factorLevel = 'GICS.Sub.Industry', grpN = 1)
+  folderName     <-  paste0('~/Desktop/HBS_execEDU/GroupData',completeTeams+1,'/')
+  getHLOC(spPairs, pth = folderName)
+  getTranscripts(pth = folderName)
+  csvFiles <- list.files(path = folderName, pattern = 'transcript', full.names = T, recursive = T)
+  chk <- file.info(csvFiles)
+  chk <- min(chk$size)==3
+  if(chk==F){
+    # Add HLOC
+    completeTeams <- completeTeams + 1
+  } else {
+    unlink(folderName,recursive=TRUE)
+  }
+  
+  
+}
+# Obtain the pairs for groups
+spPairs <- getSP500pairs(sp500, factorLevel = 'GICS.Sub.Industry', grpN = 1)
+
+
+# Add recent transcripts
+getTranscripts(pth = "~/Desktop/HBS_execEDU/GroupData5/")
 
