@@ -1,16 +1,29 @@
-
+# Need to make it performant but for now just run through it
+# Also need to make it navigate each folder, read in the csv work in that directory
 # Target
 #https://www.sec.gov/edgar/search/#/dateRange=custom&entityName=AAPL&startdt=2022-01-01&enddt=2023-07-01&filter_forms=10-K
 
 # Define the function to get the report
-getRecent10KReport <- function(symbol='AAPL', start_at='2022-01-01', end_at='2023-07-01', savePth = '~/Desktop/HBS_execEDU/tmp/') {
+# symbol can be ticker or CIK code but would need some adjustment due to padding, for company CIK, can be less than 10 0s, leading 0s are added
+# start_at  #query parameter
+# end_at #query parameter
+# savePth #where to save this
+# binaryDownloadChk # checks latest binaries every rsDriver call, should be adjusted from time to time
+getRecent10KReport <- function(symbol='0000320193', 
+                               start_at='2022-01-01',
+                               end_at='2023-07-01', 
+                               savePth = '~/Desktop/HBS_execEDU/tmp/', 
+                               binaryDownloadChk  = F) { 
   # Libs
   library(RSelenium)
   library(rvest)
   library(stringr)
   
+  
+  
   # Start a new driver
-  driver <- rsDriver(port= sample(7600)[1], browser=c("firefox"), chromever = NULL, verbose = F)
+  driver <- rsDriver(port= sample(7600)[1], browser=c("firefox"), chromever = NULL, verbose = F,
+                     check = binaryDownloadChk)
   
   # Go to the SEC Edgar search page for the specified symbol and date range
   baseURL  <- 'https://www.sec.gov/edgar/search/#/dateRange=custom&entityName='
@@ -41,7 +54,7 @@ getRecent10KReport <- function(symbol='AAPL', start_at='2022-01-01', end_at='202
   link <- driver$client$findElement(using = 'id' , "open-file")
   link <- link$getElementAttribute('href')
 
-  print(paste('working on', symbol))
+  print(paste('working on', title))
   
   # Wait for the file to load
   Sys.sleep(2)
@@ -54,11 +67,13 @@ getRecent10KReport <- function(symbol='AAPL', start_at='2022-01-01', end_at='202
     
   # Dynamic create file name
   title <- gsub('/','',title)
-  nam <- paste0(symbol,'_',title,'_.html')
+  nam <- gsub('[.]|[(]|[)]','', title)
+  nam <- gsub(' ','_', nam)
+  nam <- paste0(nam,'_.html')
     
   # Create path 
   fullName <- paste0(savePth, nam)
-    
+
   # Save File
   writeLines(pgSrc[[1]], fullName)
 
@@ -67,16 +82,18 @@ getRecent10KReport <- function(symbol='AAPL', start_at='2022-01-01', end_at='202
 }
 
 # Test
-#getRecent10KReport("APPL", start_at='2023-01-01', end_at='2023-07-01')
 #getRecent10KReport("ALB", start_at='2022-01-01', end_at='2023-07-01')
+#getRecent10KReport('WRB', start_at='2022-01-01', end_at='2023-07-01',savePth = '~/Desktop/HBS_execEDU/admin/tmp/')
 
 #tix <- c('AAPL','CRM')
 #lapply(tix, getRecent10KReport,  start_at='2022-01-01', end_at='2023-07-01')
 
 # In case you want to scrape all S&P 500 companies
-getSP500 <- function(){
+getSP500 <- function(cleanUp = T){
+  
   library(dplyr)
   library(rvest)
+  library(stringr)
   x <- read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies') %>%
     html_nodes('#constituents') %>% html_table()
   x <- x[[1]]
@@ -88,13 +105,34 @@ getSP500 <- function(){
   #grep('/wiki/', wikiURLs)
   
   
-  # Clean up
+  # Clean up names
   names(x) <-  make.names(names(x))
+  
+  if(cleanUp==T){
+    x <- x[!duplicated(x$CIK),]
+    x$CIK <- stringr::str_pad(x$CIK, 10, pad = '0')
+  }
+  
+  
   return(x)
 }
 df <- getSP500()
-lapply(df$Symbol, getRecent10KReport, start_at='2022-01-01', end_at='2023-07-01', savePth = '~/Desktop/HBS_execEDU/admin/tmp/')
-# df <- read_csv("path/symbol.csv")
-# for (symbol in df$symbol) {
-#   get_report(symbol)
-# }
+
+
+# Apply to sp500
+lapply(df$CIK, 
+       getRecent10KReport,
+       start_at='2022-01-01', 
+       end_at='2023-07-01',
+       savePth = '~/Desktop/HBS_execEDU/groupCompanyData/10k_reports/')
+
+grep('AVY', df$Symbol)
+lapply(df$CIK[57:nrow(df)], 
+       getRecent10KReport,
+       start_at='2022-01-01', 
+       end_at='2023-07-01',
+       savePth = '~/Desktop/HBS_execEDU/groupCompanyData/10k_reports/')
+
+
+
+# End
