@@ -133,6 +133,13 @@ lapply(df$CIK[57:nrow(df)],
        end_at='2023-07-01',
        savePth = '~/Desktop/HBS_execEDU/groupCompanyData/10k_reports/')
 
+grep('XYL', df$Symbol)
+lapply(df$CIK[496:nrow(df)], 
+       getRecent10KReport,
+       start_at='2022-01-01', 
+       end_at='2023-07-01',
+       savePth = '~/Desktop/HBS_execEDU/groupCompanyData/10k_reports/')
+
 
 
 # End
