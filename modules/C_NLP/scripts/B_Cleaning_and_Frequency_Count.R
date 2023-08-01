@@ -6,12 +6,8 @@
 #' Date: Nov 14, 2022
 #'
 
-# Set the working directory
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
-
 # Libs
 library(tm)
-library(readr)
 
 # Options & Functions
 Sys.setlocale('LC_ALL','C')
@@ -41,8 +37,8 @@ cleanCorpus<-function(corpus, customStopwords){
 customStopwords <- c(stopwords('english'), 'lol', 'smh', 'rofl')
 
 # Data
-text <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/coffee.csv', locale = locale(encoding = "Latin1")) # sometimes text encoding causes problems so declaring it as latin
-View(text)
+text <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/coffee.csv') # sometimes text encoding causes problems so declaring it as latin
+head(text)
 
 # As of tm version 0.7-3 tabular was deprecated
 ?DataframeSource

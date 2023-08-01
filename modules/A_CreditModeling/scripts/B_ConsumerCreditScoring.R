@@ -3,9 +3,6 @@
 #' Purpose: Lending Club score notes and visualize
 #' 
 
-# WD
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
-
 # Options
 options(scipen = 999)
 
@@ -21,9 +18,8 @@ library(MLmetrics)
 library(rbokeh)
 
 # I/O
-df <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/H_CreditModeling/data/20K_sampleLoans.csv') 
-df <- as.data.frame(df)
-newNotes <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/H_CreditModeling/data/OpenNotesJune18_v2.csv')
+df <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/H_CreditModeling/data/20K_sampleLoans.csv') 
+newNotes <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/H_CreditModeling/data/OpenNotesJune18_v2.csv')
 
 # Keep the pertinent information
 keeps <- c("loan_amnt", "term", "int_rate", "installment", "grade", "sub_grade", "emp_length" , "home_ownership", "annual_inc", "purpose", "title", "zip_code", "addr_state", "dti", "delinq_2yrs", "pub_rec_bankruptcies", "inq_last_6mths", "mths_since_last_delinq", "mths_since_last_record", "open_acc", "pub_rec", "revol_bal", "revol_util", "total_acc", "collections_12_mths_ex_med", "mths_since_last_major_derog","y")
@@ -108,6 +104,7 @@ onlyA <- subset(testSetComparison, testSetComparison$grade == "A")
 testSetBEST <- subset(testSetComparison, 
                       testSetComparison$grade == "A" & 
                       testSetComparison$risk <= 0.1 )
+head(testSetBEST)
 
 # How many were 0 in the ENTIRE test set? Random Selection 
 sum(testSetComparison$y==0) / nrow(testSetComparison)
@@ -115,10 +112,10 @@ sum(testSetComparison$y==0) / nrow(testSetComparison)
 # How many were 0 among "A" (their best guess)? Accept their model
 sum(onlyA$y==0)/nrow(onlyA)
 
-# How many were "A" (their guess) &  10% default risk for comparison (our guess)? Combine their expertise & our model
+# How many were "A" (their guess) &  sub 10% default risk for comparison (our guess)? Combine their expertise & our model
 sum(testSetBEST$y==0) / nrow(testSetBEST)
 
-# Using "A" & "10%" now apply to open/new loans
+# Assemble the new notes with their guess, and our model output
 scoredNotes <- data.frame(id           = 1:nrow(treatedNew),
                           risk         = newNotesProbs[,1],
                           successProb  = newNotesProbs[,2],
@@ -129,7 +126,7 @@ scoredNotes <- data.frame(id           = 1:nrow(treatedNew),
 scoredNotes <- scoredNotes[order(scoredNotes$risk),]
 head(scoredNotes, 10)
 
-# Subset to "A" & 10%; our and their best guess
+# Subset to "A" & 10%; our and their best guess which showed lift earlier
 bestNotes <- subset(scoredNotes, 
                     scoredNotes$LCgrade == "A" & scoredNotes$risk <= 0.1)
 

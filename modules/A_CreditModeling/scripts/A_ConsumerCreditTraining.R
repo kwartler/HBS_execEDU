@@ -1,10 +1,7 @@
 #' Author: Ted Kwartler
-#' Date: Oct 31, 2022
+#' Date: July 31, 2023
 #' Purpose: Lending Club Modeling, Cross Validation
 #' 
-
-# WD
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
 
 # Options
 options(scipen = 999)
@@ -19,8 +16,7 @@ library(vtreat)
 library(readr)
 
 # I/O
-df <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/H_CreditModeling/data/20K_sampleLoans.csv') 
-df <- as.data.frame(df)
+df <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/H_CreditModeling/data/20K_sampleLoans.csv') 
 
 # Keep the pertinent information
 keeps <- c("loan_amnt", "term", "int_rate", "installment", "grade", "sub_grade", "emp_length" , "home_ownership", "annual_inc", "purpose", "title", "zip_code", "addr_state", "dti", "delinq_2yrs", "pub_rec_bankruptcies", "inq_last_6mths", "mths_since_last_delinq", "mths_since_last_record", "open_acc", "pub_rec", "revol_bal", "revol_util", "total_acc", "initial_list_status", "collections_12_mths_ex_med", "mths_since_last_major_derog","y")
@@ -74,10 +70,8 @@ preds <- predict(fit3, training)
 table(preds, training$y)
 MLmetrics::Accuracy(preds, training$y)
 
-# what happens when we put in original data?
-newPreds <- predict(fit3, df)
 
-# Remember to use the treated version of the data
+# Remember to use the treated version of any data for scoring
 newPreds <- predict(fit3, validation)
 table(newPreds, validation$y)
 MLmetrics::Accuracy(newPreds, validation$y)
@@ -101,8 +95,11 @@ summary(chk$probs.1)
 
 # Depending on the amount of your portfolio and what we learned you may want to increase the cutoff to optimize payoff not overall accuracy
 losingMoney$highCutoff <- ifelse(losingMoney$probs.1 > 0.98,1,0)
-highThreshold <- table(losingMoney$highCutoff, validation$y) #704 is now 55, much less chance of getting it wrong
+highThreshold <- table(losingMoney$highCutoff, validation$y) 
 highThreshold
 MLmetrics::Accuracy(losingMoney$highCutoff, validation$y)
+
+# But within those identified as ok, how many were actually defaulted
+subset(losingMoney, losingMoney$highCutoff==1)
 
 # End

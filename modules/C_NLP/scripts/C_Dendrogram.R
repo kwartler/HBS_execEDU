@@ -6,16 +6,12 @@
 #' Date: Nov 14, 2022
 #'
 
-# Set the working directory
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
-
 # Libs
 library(tm)
-library(qdap)
+library(qdap) # this can be a tricky install for mac users, if it's a problem just ignore it.
 library(ggplot2)
 library(ggthemes)
 library(ggdendro)
-library(readr)
 
 
 # Options & Functions
@@ -44,7 +40,7 @@ cleanCorpus <- function(corpus, customStopwords){
 customStopwords <- c(stopwords('english'), 'lol', 'smh', 'beer', 'amp')
 
 # Data 
-text <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/beer.csv', locale = locale(encoding = "Latin1"))
+text <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/beer.csv')
 
 # As of tm version 0.7-3 tabular was deprecated
 names(text)[1] <- 'doc_id' 

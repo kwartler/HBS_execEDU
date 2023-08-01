@@ -40,7 +40,7 @@ table(df$Lag.1)
 
 # Now let's do it for a longer backtest with a different stock
 stk   <- getSymbols("NVDA", auto.assign = F) 
-stk   <- stk['2019-01-01/']
+stk   <- stk['2020-07-01/'] #2019-01-01
 ma50  <- SMA(Cl(stk), 50)
 ma200 <- SMA(Cl(stk), 200)
 

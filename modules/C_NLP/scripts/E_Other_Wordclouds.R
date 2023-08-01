@@ -6,17 +6,11 @@
 #' Date: Nov 14, 2022
 #'
 
-# Set the working directory
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
-
 # Libs
 library(tm)
 library(qdap)
 library(wordcloud)
 library(RColorBrewer)
-library(pbapply)
-library(readr)
-
 
 # Options & Functions
 options(stringsAsFactors = FALSE)

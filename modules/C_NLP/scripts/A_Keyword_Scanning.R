@@ -6,9 +6,6 @@
 #' Date: APRIL 10 2022
 #'
 
-# Set the working directory
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
-
 # Libs
 library(stringi)
 library(readr)
@@ -17,8 +14,7 @@ library(readr)
 Sys.setlocale('LC_ALL','C') #some tweets are in different languages so you may get an error
 
 # Get Data
-text <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/coffee.csv')
-text <- as.data.frame(text)
+text <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/coffee.csv')
 
 # Logical T/F vector that a string appears at least ONCE
 coffee    <- grepl("coffee", text$text, ignore.case=TRUE)

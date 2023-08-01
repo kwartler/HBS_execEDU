@@ -6,9 +6,6 @@
 #' Date: Nov 14 2022
 #' 
 
-# Set the working directory
-setwd("~/Desktop/Harvard_DataMining_Business_Student/personalFiles")
-
 # Libs
 library(tm)
 library(qdap)
@@ -50,7 +47,7 @@ bigramTokens <-function(x){
   }
   
 # Data
-text <- read_csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/chardonnay.csv', locale = locale(encoding = "Latin1"))
+text <- read.csv('https://raw.githubusercontent.com/kwartler/Harvard_DataMining_Business_Student/master/Lessons/J_Text_Mining/data/chardonnay.csv')
 
 # As of tm version 0.7-3 tabular was deprecated
 names(text)[1]<-'doc_id' 
